@@ -1,26 +1,26 @@
 # DevOps Infrastructure Templates & Automation Sandbox
 
-Welcome to my personal repository of production-ready infrastructure templates, CI/CD configurations, and automation utilities. This repository serves as a boilerplate library and a sandbox for testing GitOps, IaC, and SRE methodologies across various cloud environments.
+My personal collection of infrastructure templates, CI/CD configs, and automation scripts. I use this repository as a baseline library for setting up environments and testing GitOps, IaC, and SRE practices.
 
 ## 📁 Repository Structure
 
-* **terraform/**: Infrastructure as Code (IaC) configuration for deploying networking (VPC, Subnets) and a Managed Service for Kubernetes cluster with specialized GPU worker nodes in Yandex Cloud.
-* **helm/**: A parameterized Helm v3 chart for microservice deployment, complete with pre-configured resource limits, horizontal pod autoscaling (HPA), and Nginx Ingress routes.
-* **gitlab-ci/**: A complete enterprise-grade DevSecOps pipeline definition (`.gitlab-ci.yml`) including chart linting, secure Docker builds, automated vulnerability scanning with Trivy, and automated GitOps image tag updates.
-* **automation/**: A set of internal automation scripts featuring a Bash utility for backup retention, a Python script for microservice endpoint observability, and a custom Golang CLI tool simulating container registry cleanup logic.
+* **terraform/**: Terraform manifests to spin up a VPC, subnets, and a Managed Kubernetes cluster with GPU-enabled worker nodes in Yandex Cloud.
+* **helm/**: A basic Helm v3 chart for microservices with pre-configured resource limits (including GPU), HPA, and Nginx Ingress routes.
+* **gitlab-ci/**: GitLab CI pipeline configuration (`.gitlab-ci.yml`) that includes Helm linting, Docker build, security scanning via Trivy, and automated GitOps image tag updates.
+* **automation/**: Practical automation scripts: Bash script for backup rotation, Python script for endpoint health checks, and a custom Go CLI utility for container registry cleanup simulation.
 
-## 🛠️ Stack & Technologies
+## 🛠️ Stack
 
-* **Cloud & Orchestration**: Yandex Cloud, Kubernetes (Managed Service), Helm v3, ArgoCD (GitOps).
+* **Cloud & Orchestration**: Yandex Cloud, Kubernetes, Helm v3, ArgoCD.
 * **Infrastructure as Code**: Terraform.
 * **CI/CD & Security**: GitLab CI/CD, Docker, Trivy.
-* **Automation**: Golang, Python, Bash.
+* **Languages**: Golang, Python, Bash.
 
-## 🚀 Key Implementation Details
+## 🚀 Implementation Notes
 
-1.  **Infrastructure as Code**: The Terraform manifests leverage the official Yandex Cloud provider to provision a highly available environment, abstracting cloud IDs via variables and using native resource blocks for isolated network design.
-2.  **GPU Compute Provisioning**: The K8s node group is configured using the `gpu-standard-v3` platform to demonstrate automated hardware acceleration attachment for compute-intensive and ML tasks, paired with specific container runtime limit injections (`nvidia.com/gpu`).
-3.  **DevSecOps & GitOps Workflow**: The continuous integration pipeline shifts security left by gating production deployments with `trivy` container scanning. Upon passing security checks, it executes automated value injection back into the Git repository to trigger continuous deployment sync loops.
+1. **Infrastructure**: The Terraform code uses variables for Cloud IDs and provisions a standard production-ready network layout along with the K8s master and node groups.
+2. **GPU Support**: The Kubernetes node group uses the `gpu-standard-v3` platform. Container resource limits (`nvidia.com/gpu`) are configured in the Helm values to demonstrate hardware acceleration handling.
+3. **CI/CD Workflow**: The pipeline builds the Docker image, runs a security check using Trivy, and then uses a service script to update the image tag directly in the Helm values to trigger an ArgoCD sync.
 
 ---
-*Maintained by Nikolai Munov. Feel free to use these templates as a baseline for your cloud-native deployments.*
+Maintained by Nikolai Munov.
