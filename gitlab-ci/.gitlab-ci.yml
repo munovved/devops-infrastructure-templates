@@ -1,0 +1,47 @@
+stages:
+  - lint
+  - build
+  - test
+  - deploy
+
+variables:
+  IMAGE_NAME: "cr.yandex/zero-copy/enterprise-service"
+  IMAGE_TAG: "$CI_COMMIT_SHORT_SHA"
+
+helm_lint:
+  stage: lint
+  image: alpine/helm:3.12.0
+  script:
+    - helm lint ./helm
+
+docker_build:
+  stage: build
+  image: docker:24.0.5
+  services:
+    - docker:24.0.5-dind
+  script:
+    - docker login -u oauth -p $YANDEX_OAUTH_TOKEN cr.yandex
+    - docker build -t $IMAGE_NAME:$IMAGE_TAG -t $IMAGE_NAME:latest ./
+    - docker push $IMAGE_NAME:$IMAGE_TAG
+    - docker push $IMAGE_NAME:latest
+
+security_trivy:
+  stage: test
+  image: aquasec/trivy:latest
+  script:
+    - trivy image --exit-code 1 --severity CRITICAL,HIGH $IMAGE_NAME:$IMAGE_TAG
+
+deploy_gitops:
+  stage: deploy
+  image: alpine/git:latest
+  script:
+    - git config --global user.email "ci-bot@enterprise.local"
+    - git config --global user.name "CI Bot"
+    - git clone https://oauth2:$ARGOCD_GIT_TOKEN@github.com/$CI_PROJECT_PATH.git repo-tmp
+    - cd repo-tmp
+    - sed -i "s|tag:.*|tag: \"$IMAGE_TAG\"|g" ./helm/values.yaml
+    - git add ./helm/values.yaml
+    - git commit -m "Update image tag to $IMAGE_TAG [skip ci]"
+    - git push origin main
+  only:
+    - main
